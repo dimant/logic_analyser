@@ -62,14 +62,7 @@ set_global_assignment -name FMAX_REQUIREMENT "25 MHz" -section_id "clock FPGA"
 set_instance_assignment -name CLOCK_SETTINGS "clock FPGA" -to clk_FPGA
 set_global_assignment -name EXCLUDE_FMAX_PATHS_GREATER_THAN "120 MHz"
 set_global_assignment -name EXCLUDE_SLACK_PATHS_GREATER_THAN "10 ns"
-set_global_assignment -name VERILOG_FILE parse_command.v
-set_global_assignment -name VERILOG_FILE uart.v
-set_global_assignment -name VERILOG_FILE logic_analyser.v
-set_global_assignment -name VERILOG_FILE synchronizer.v
-set_global_assignment -name VERILOG_FILE acquire.v
-set_global_assignment -name VERILOG_FILE transmit.v
 set_global_assignment -name SIMULATION_MODE FUNCTIONAL
-set_global_assignment -name VERILOG_FILE task_dispatcher.v
 set_location_assignment PIN_38 -to clk_ADC
 set_location_assignment PIN_27 -to adc_data[6]
 set_location_assignment PIN_28 -to adc_data[7]
@@ -79,8 +72,16 @@ set_location_assignment PIN_30 -to adc_data[3]
 set_location_assignment PIN_33 -to adc_data[2]
 set_location_assignment PIN_48 -to adc_data[1]
 set_location_assignment PIN_47 -to adc_data[0]
-set_global_assignment -name QIP_FILE ram.qip
-set_global_assignment -name QIP_FILE counter.qip
 set_global_assignment -name EDA_SIMULATION_TOOL "Custom Verilog HDL"
 set_global_assignment -name EDA_TIME_SCALE "1 ps" -section_id eda_simulation
 set_global_assignment -name EDA_OUTPUT_DATA_FORMAT "VERILOG HDL" -section_id eda_simulation
+set_global_assignment -name VERILOG_FILE reset_uart.v
+set_global_assignment -name VERILOG_FILE parse_command.v
+set_global_assignment -name VERILOG_FILE uart.v
+set_global_assignment -name VERILOG_FILE logic_analyser.v
+set_global_assignment -name VERILOG_FILE synchronizer.v
+set_global_assignment -name VERILOG_FILE acquire.v
+set_global_assignment -name VERILOG_FILE transmit.v
+set_global_assignment -name VERILOG_FILE task_dispatcher.v
+set_global_assignment -name QIP_FILE ram.qip
+set_global_assignment -name QIP_FILE counter.qip

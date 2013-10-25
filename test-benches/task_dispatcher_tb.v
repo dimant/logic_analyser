@@ -9,10 +9,12 @@ module task_dispatcher_tb();
 
    task_dispatcher td(clk, rst,
                       grant_acq, grant_txd,
-                      done_acq, done_txd,
-                      led);
+                      done_acq, done_txd);
    
-   initial begin 
+   initial begin
+      $dumpfile("task_dispatcher.vcd");
+      $dumpall();      
+      
       // $monitor("%d | %d %d | %d %d ", 
       //          clk, 
       //          grant_acq, done_acq, 
@@ -24,7 +26,7 @@ module task_dispatcher_tb();
       done_txd = 1'b0;      
       
       #5 rst = 1'b1;
-      #10 rst = 1'b0;
+      #5 rst = 1'b0;
 
    end
 
@@ -32,55 +34,22 @@ module task_dispatcher_tb();
      #5 clk = !clk;
    
    always @(posedge grant_acq) begin
-      #25 done_acq = 1'b1;
-      #5 done_acq = 1'b0;      
+      #35 done_acq = 1'b1;
+      #10 done_acq = 1'b0;      
    end
 
    always @(posedge grant_txd) begin
-      #25 done_txd = 1'b1;
-      #5 done_txd = 1'b0;
+      #35 done_txd = 1'b1;
+      #10 done_txd = 1'b0;
    end
 
-   always @(posedge done_acq) begin
-      if( ~ (grant_acq == 1 &
-             done_acq == 1 &
-             grant_txd == 0 &
-             done_txd == 0) )
-        -> t_fail;
-      
-      #5 if( ~ (grant_acq == 1 &
-             done_acq == 0 &
-             grant_txd == 0 &
-             done_txd == 0) )
-        -> t_fail;
+   always @(negedge done_acq) begin
+      if(~grant_txd | grant_acq) -> t_fail;      
+   end 
 
-      #10 if( ~ (grant_acq == 0 &
-             done_acq == 0 &
-             grant_txd == 1 &
-             done_txd == 0) )
-        -> t_fail;
-   end // always @ (posedge done_acq)
-
-
-   always @(posedge done_txd) begin
-      if( ~ (grant_acq == 0 &
-             done_acq == 0 &
-             grant_txd == 1 &
-             done_txd == 1) )
-        -> t_fail;
-      
-      #5 if( ~ (grant_acq == 0 &
-             done_acq == 0 &
-             grant_txd == 1 &
-             done_txd == 0) )
-        -> t_fail;
-
-      #10 if( ~ (grant_acq == 1 &
-             done_acq == 0 &
-             grant_txd == 0 &
-             done_txd == 0) )
-        -> t_fail;
-   end // always @ (posedge done_acq)
+   always @(negedge done_txd) begin
+      if(~grant_acq | grant_txd) -> t_fail;
+   end 
    
    initial
      #200 $finish;

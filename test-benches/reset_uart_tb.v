@@ -14,7 +14,7 @@ module reset_uart_tb();
    initial begin 
       clk = 1'b0;
       
-      //$monitor("%d %d %d %d", clk, rst, rx_data_fresh, rx_data);
+
       
       #5 rx_data = 8'b11111111;
       #5 rx_data_fresh = 1'b1;
@@ -26,16 +26,19 @@ module reset_uart_tb();
    always
      #5 clk = !clk;
 
-   always @(posedge rx_data_fresh) begin
-      if(&rx_data & ~rst)
-        -> t_fail;
-      #4 if(~rst)
-        -> t_fail;
-      #5 if(rst)
-        -> t_fail;      
-   end
+   always @(posedge clk)
+     $display("%d %d %d", rst, rx_data_fresh, rx_data);
+
+   reg resetted;
    
-   initial
-     #50 $finish;
+   always @(posedge rst) begin
+      resetted = rst;      
+   end
+      
+   initial begin
+      #50 if(~resetted | rst) -> t_fail;
+      
+      #50 $finish;
+   end
 
 endmodule // reset_uart_tb

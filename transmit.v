@@ -44,9 +44,9 @@ module transmit(clk, rst,
    end
    
    always @(state or 
-            posedge tx_data_ack or
-            posedge grant_txd or
-            posedge done) begin      
+            tx_data_ack or
+            grant_txd or
+            done) begin      
       next <= 3'b000;
       
       case(1'b1)
@@ -68,7 +68,8 @@ module transmit(clk, rst,
           else
             next[TXD_VALID] <= 1'b1;           
         end
-          
+        default:
+          next <= 3'b001;
       endcase
 end
 

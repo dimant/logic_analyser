@@ -10,19 +10,22 @@ module reset_uart(clk, rx_data_fresh, rx_data, rst);
    localparam STATE_RST = 1'b1;
    
    reg    state;
-   wire   rst = state;
-   
-   always @(posedge rx_data_fresh) begin
-      if(&rx_data)
-        state <= STATE_RST;      
-   end
 
-   always @(posedge clk) begin
+   wire   rst = state;
+
+   wire rst_cmd = rx_data_fresh & &rx_data;
+   
+   always @(posedge clk) begin     
       case(state)
-        STATE_IDLE:
+        STATE_IDLE: begin
+           if(rst_cmd)
+             state <= STATE_RST;
+           else
+             state <= STATE_IDLE;           
+        end	
+        STATE_RST: begin
           state <= STATE_IDLE;
-        STATE_RST:
-          state <= STATE_IDLE;
+        end
       endcase // case (state)      
    end
 

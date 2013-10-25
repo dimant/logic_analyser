@@ -12,10 +12,7 @@
 module acquire(clk, rst,
                grant_acq, done_acq,
                adc_data, 
-               wr_addr, wr_data, wr_en);
-   
-   parameter RAM_SIZE = 8 * 512;
-
+               wr_addr, wr_data, wr_en);  
    input clk;
    input rst;   
    input grant_acq;
@@ -31,47 +28,40 @@ module acquire(clk, rst,
    
    wire         last_addr = &wr_addr;   
    
-   localparam IDLE = 0;   
-   localparam WRITE = 1;
+   localparam STATE_IDLE = 1'b0;
+   localparam STATE_WRITE = 1'b1;
    
-   reg [1:0]    state;
-   reg [1:0]    next;
-    
-   wire         wr_en = state[WRITE];
-   wire         done_acq = state[IDLE] & last_addr;
+   reg          state;
+   reg          next;
    
-   always @(posedge clk or posedge rst)
-     if(rst)
-       state <= 2'b01;
-     else
-       state <= next;  
-  
-   always @(state or
-            posedge grant_acq or
-            posedge last_addr) begin
-     next <= 2'b00;
+   wire         wr_en = state;
+   wire         done_acq = ~state & last_addr;
    
-     case(1'b1)
-       state[IDLE]: begin
-          if(grant_acq)
-            next[WRITE] <= 1'b1;
-          else
-            next[IDLE] <= 1'b1;          
-       end
-       state[WRITE]: begin
-          if(last_addr)
-            next[IDLE] <= 1'b1;
-          else
-            next[WRITE] <= 1'b1;          
-       end
-     endcase 
+   always @(posedge clk or posedge rst) begin
+      if(rst)
+        state <= STATE_IDLE;
+
+      case(state)       
+        STATE_IDLE: begin
+           if(grant_acq)
+             state <= STATE_WRITE;
+           else
+             state <= STATE_IDLE;          
+        end
+        STATE_WRITE: begin
+           if(last_addr)
+             state <= STATE_IDLE;          
+           else
+             state <= STATE_WRITE;
+        end
+      endcase 
    end
    
-counter	wr_addr_cntr (
-	.clock ( clk ),
-	.cnt_en ( wr_en ),
-	.sclr ( done_acq ),
-	.q ( wr_addr )
-	);
+   counter	wr_addr_cntr (
+	                      .clock ( clk ),
+	                      .cnt_en ( wr_en ),
+	                      .sclr ( done_acq ),
+	                      .q ( wr_addr )
+	                      );
 
 endmodule

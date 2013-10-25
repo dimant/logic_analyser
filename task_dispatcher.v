@@ -1,7 +1,6 @@
 module task_dispatcher(clk, rst,
                        grant_acq, grant_txd,
-                       done_acq, done_txd,
-                       led);
+                       done_acq, done_txd);
    input clk;
    input rst;
    
@@ -10,9 +9,7 @@ module task_dispatcher(clk, rst,
    
    output grant_acq;   
    output grant_txd;
-   output led;   
 
-   localparam STATE_IDLE = 2'b00;
    localparam STATE_ACQ = 2'b01;
    localparam STATE_TXD = 2'b10;
 
@@ -25,24 +22,21 @@ module task_dispatcher(clk, rst,
    wire      grant_txd = state[1];   
    wire      done_txd;
 
-   wire      led = state;
+
    
    always @(posedge clk or posedge rst) begin
       if(rst) 
-        state <= STATE_IDLE; 
-      else 
-        state <= next;
+        state <= STATE_ACQ;
+      else
+        state <= next;      
    end
    
-   always @(state or 
-            posedge done_acq or 
-            posedge done_txd) begin
-      next = STATE_IDLE;      
-             
+   always @(state or
+            done_acq or 
+            done_txd) begin
+      next = 2'b00;
+
       case(state)
-        STATE_IDLE: begin
-           next = STATE_ACQ;           
-        end
         STATE_ACQ: begin
            if(done_acq)
              next = STATE_TXD;
@@ -55,6 +49,8 @@ module task_dispatcher(clk, rst,
            else
              next = STATE_TXD;
         end        
+        default:
+		    next = STATE_ACQ;
       endcase // case (state)
    end   
    
