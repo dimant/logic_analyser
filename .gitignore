@@ -17,3 +17,5 @@ logic_analyser.sof
 logic_analyser.tan.rpt
 logic_analyser.tan.summary
 simulation/
+test-benches/*vvp
+test-benches/*log
