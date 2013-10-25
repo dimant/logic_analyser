@@ -1,59 +1,75 @@
-
 // transmit module
 // writes contents of ram on serial port
 // pings back when done
 
-module transmit(clk, grant, done, tx_data, tx_data_valid, tx_data_ack, rd_addr, rd_data);
-parameter RAM_SIZE = 8 * 512;
+module transmit(clk, rst,
+                grant_txd, done_txd, 
+                tx_data, tx_data_valid, tx_data_ack, 
+                rd_addr, rd_data);
    
-input clk;
-input grant;
-input tx_data_ack;
-input [7:0] rd_data;
+   parameter RAM_SIZE = 8 * 512;
+   
+   input clk;
+   input rst;   
+   input grant_txd;
+   input tx_data_ack;
+   input [7:0] rd_data;
 
-output done;
-output [7:0] tx_data;
-output tx_data_valid;
-output [9:0] rd_addr;
+   output      done_txd;
+   output [7:0] tx_data;
+   output       tx_data_valid;
+   output [9:0] rd_addr;
+           
+   localparam IDLE = 0;
+   localparam TXD_VALID = 1;
+   localparam COUNT = 2;
 
-wire [7:0] tx_data;
-wire [9:0] rd_addr;
+   reg [2:0]    state;
+   reg [2:0]    next;   
+   
+   wire [7:0]   tx_data = rd_data;
+   wire [9:0]   rd_addr;
+   
+   wire         tx_data_valid = state[TXD_VALID];
+   wire         rd_addr_inc_en = state[COUNT];
 
-reg [3:0] state;
-
-wire tx_data_valid = state[1];
-wire rd_addr_inc_en = state[2];
-wire done = state[3];
-
-localparam STATE_IDLE = 4'b0000;
-localparam STATE_TRANSMIT = 4'b0001;
-localparam STATE_TXD_VALID = 4'b0010;
-localparam STATE_COUNT = 4'b0100;
-localparam STATE_SAY_DONE = 4'b1000;
-
-always @(posedge clk) begin
-	case(state)
-	STATE_IDLE: begin
-		if(grant)
-			state <= STATE_TRANSMIT;
+   wire         last_addr = &rd_addr;
+   wire         done = last_addr & tx_data_ack;
+   
+   always @(posedge clk) begin
+      if(rst) 
+        state <= 3'b001; 
+      else
+        state <= next;      
+   end
+   
+   always @(state or 
+            posedge tx_data_ack or
+            posedge grant_txd or
+            posedge done) begin      
+      next <= 3'b000;
+      
+      case(1'b1)
+	state[IDLE]: begin
+           if(grant_txd)
+             next[TXD_VALID] <= 1'b1;
+           else
+             next[IDLE] <= 1'b1;           
 	end
-	STATE_TRANSMIT: begin
-		if(&rd_addr)
-			state <= STATE_SAY_DONE;
-		else
-			state <= STATE_TXD_VALID;
-	end
-	STATE_TXD_VALID: begin
-		if(tx_data_ack)
-			state <= STATE_COUNT;
-	end
-	STATE_COUNT: begin
-		state <= STATE_TRANSMIT;
-	end
-	STATE_SAY_DONE: begin
-		state <= STATE_IDLE;
-	end
-	endcase
+        state[TXD_VALID]: begin
+          if(tx_data_ack)
+            next[COUNT] <= 1'b1;
+          else
+            next[TXD_VALID] <= 1'b1;           
+        end
+        state[COUNT]: begin
+          if(done)
+            next[IDLE] <= 1'b1;
+          else
+            next[TXD_VALID] <= 1'b1;           
+        end
+          
+      endcase
 end
 
 // seems like it doesn't start from 0
@@ -61,11 +77,8 @@ end
 counter	wr_addr_cntr (
 	.clock ( clk ),
 	.cnt_en ( rd_addr_inc_en ),
-	.sclr ( done ),
+	.sclr ( done_txd ),
 	.q ( rd_addr )
-	);
-	
-assign tx_data = rd_data;
+	);	
 
 endmodule // transmit
-

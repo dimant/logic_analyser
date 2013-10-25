@@ -16,9 +16,9 @@ module task_dispatcher(clk,
    output      grant_txd;
    output      led;   
 
-   parameter STATE_RST = 2'b00;
-   parameter STATE_ACQ = 2'b01;
-   parameter STATE_TXD = 2'b10;
+   localparam STATE_RST = 2'b00;
+   localparam STATE_ACQ = 2'b01;
+   localparam STATE_TXD = 2'b10;
 
    reg [1:0] state;
    reg [1:0] nextstate;

@@ -6,8 +6,8 @@ module reset_uart(clk, rx_data_fresh, rx_data, rst);
    output rst;   
 
    // parameter RST_COMMAND = 8'b11111111;
-   parameter STATE_IDLE = 1'b0;
-   parameter STATE_RST = 1'b1;
+   localparam STATE_IDLE = 1'b0;
+   localparam STATE_RST = 1'b1;
    
    reg    state;
    wire   rst = state;
