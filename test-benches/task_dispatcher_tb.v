@@ -2,16 +2,14 @@ module task_dispatcher_tb();
 `include "fail_event.v"
    
    reg clk;
+   reg rst;
+   
+   reg done_acq;
+   reg done_txd;   
 
-   reg [7:0] rx_data;
-   reg       rx_data_fresh;
-   reg       done_acq;
-   reg       done_txd;   
-
-   task_dispatcher td(clk, 
+   task_dispatcher td(clk, rst,
                       grant_acq, grant_txd,
                       done_acq, done_txd,
-                      rx_data_fresh, rx_data,
                       led);
    
    initial begin 
@@ -25,11 +23,9 @@ module task_dispatcher_tb();
       done_acq = 1'b0;
       done_txd = 1'b0;      
       
-      #5 rx_data_fresh = 1'b1;
-      #5 rx_data = 8'd98;
+      #5 rst = 1'b1;
+      #10 rst = 1'b0;
 
-      #10 rx_data_fresh = 1'b0;
-      #10 rx_data = 8'd0;      
    end
 
    always
