@@ -9,54 +9,69 @@
 // writes into ram
 // pings back when ram is full
 
-`timescale 1 ps / 1 ps
-
-module acquire(clk, grant, done, adc_data, wr_addr, wr_data, wr_en);
-parameter RAM_SIZE = 8 * 512;
-
-input clk;
-input grant;
-input [7:0] adc_data;
-
-output done;
-output [9:0] wr_addr;
-output [7:0] wr_data;
-output wr_en;
+module acquire(clk, rst,
+               grant_acq, done_acq,
+               adc_data, 
+               wr_addr, wr_data, wr_en);
    
-wire [9:0] wr_addr;
-wire [7:0] wr_data;
+   parameter RAM_SIZE = 8 * 512;
 
-localparam STATE_IDLE = 2'b00;
-localparam STATE_WRITE = 2'b01;
-localparam STATE_SAY_DONE = 2'b10;
-
-reg [1:0] state;
-wire wr_en = state[0];
-wire done = state[1];
-
-always @(posedge clk) begin
-	case(state)
-	STATE_IDLE: begin
-		if(grant)
-			state <= STATE_WRITE;
-	end
-	STATE_WRITE: begin
-		if(&wr_addr)
-			state <= STATE_SAY_DONE;
-	end
-	STATE_SAY_DONE: begin
-		state <= STATE_IDLE;
-	end
-	endcase
-end
-
+   input clk;
+   input rst;   
+   input grant_acq;
+   input [7:0] adc_data;
+   
+   output      done_acq;
+   output [9:0] wr_addr;
+   output [7:0] wr_data;
+   output       wr_en;
+   
+   wire [9:0]   wr_addr;
+   wire [7:0]   wr_data = adc_data;
+   
+   wire         last_addr = &wr_addr;   
+   
+   localparam IDLE = 0;   
+   localparam WRITE = 1;
+   
+   reg [1:0]    state;
+   reg [1:0]    next;
+    
+   wire         wr_en = state[WRITE];
+   wire         done_acq = state[IDLE] & last_addr;
+   
+   always @(posedge clk or posedge rst)
+     if(rst)
+       state <= 2'b01;
+     else
+       state <= next;  
+  
+   always @(state or
+            posedge grant_acq or
+            posedge last_addr) begin
+     next <= 2'b00;
+   
+     case(1'b1)
+       state[IDLE]: begin
+          if(grant_acq)
+            next[WRITE] <= 1'b1;
+          else
+            next[IDLE] <= 1'b1;          
+       end
+       state[WRITE]: begin
+          if(last_addr)
+            next[IDLE] <= 1'b1;
+          else
+            next[WRITE] <= 1'b1;          
+       end
+     endcase 
+   end
+   
 counter	wr_addr_cntr (
 	.clock ( clk ),
 	.cnt_en ( wr_en ),
 	.sclr ( done ),
 	.q ( wr_addr )
 	);
-
-assign wr_data = adc_data;
 
 endmodule

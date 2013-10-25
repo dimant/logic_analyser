@@ -30,7 +30,7 @@ module transmit_tb();
       #10 rst = 1'b0;
       
       #15 grant = 1'b1;           
-   end
+   end                          
 
    wire last_addr;
 
@@ -55,3 +55,4 @@ module transmit_tb();
    initial
      #5000 $finish;
 endmodule // transmit_tb
+

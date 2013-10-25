@@ -27,7 +27,7 @@ module task_dispatcher(clk, rst,
 
    wire      led = state;
    
-   always @(posedge clk) begin
+   always @(posedge clk or posedge rst) begin
       if(rst) 
         state <= STATE_IDLE; 
       else 

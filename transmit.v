@@ -36,7 +36,7 @@ module transmit(clk, rst,
    wire         last_addr = &rd_addr;
    wire         done = last_addr & tx_data_ack;
    
-   always @(posedge clk) begin
+   always @(posedge clk or posedge rst) begin
       if(rst) 
         state <= 3'b001; 
       else
