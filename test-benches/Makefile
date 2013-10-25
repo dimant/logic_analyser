@@ -5,7 +5,7 @@ TESTS=acquire.vvp parse_command.vvp synchronizer.vvp task_dispatcher.vvp transmi
 TESTLOGS=$(TESTS:.vvp=.log)
 
 all: $(TESTLOGS)
-
+	ruby report.rb
 acquire.vvp: ../acquire.v acquire_tb.v ../counter_syn.v
 	$(CC) -o $@ $^
 
@@ -25,7 +25,7 @@ uart.vvp: ../uart.v uart_tb.v
 	$(CC) -o $@ $^
 
 %.log: %.vvp
-	$(SYM) -n $*.vvp -l $*.log
+	$(SYM) -n $*.vvp > $*.log
 
 clean:
 	rm -f *.vvp *.vcd
