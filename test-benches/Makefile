@@ -1,11 +1,12 @@
 CC=iverilog
 SYM=vvp
 
-TESTS=acquire.vvp parse_command.vvp synchronizer.vvp task_dispatcher.vvp transmit.vvp uart.vvp
+TESTS=acquire.vvp parse_command.vvp synchronizer.vvp task_dispatcher.vvp transmit.vvp uart.vvp reset_uart.vvp
 TESTLOGS=$(TESTS:.vvp=.log)
 
 all: $(TESTLOGS)
 	ruby report.rb
+
 acquire.vvp: ../acquire.v acquire_tb.v ../counter_syn.v
 	$(CC) -o $@ $^
 
@@ -22,6 +23,9 @@ transmit.vvp: ../transmit.v transmit_tb.v ../counter_syn.v
 	$(CC) -o $@ $^
 
 uart.vvp: ../uart.v uart_tb.v 
+	$(CC) -o $@ $^
+
+reset_uart.vvp: ../reset_uart.v reset_uart_tb.v
 	$(CC) -o $@ $^
 
 %.log: %.vvp
