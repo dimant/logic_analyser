@@ -70,7 +70,7 @@ module acquire(clk, rst,
 counter	wr_addr_cntr (
 	.clock ( clk ),
 	.cnt_en ( wr_en ),
-	.sclr ( done ),
+	.sclr ( done_acq ),
 	.q ( wr_addr )
 	);
 

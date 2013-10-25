@@ -32,9 +32,7 @@ module transmit_tb();
       #15 grant = 1'b1;           
    end                          
 
-   wire last_addr;
-
-   assign last_addr = &rd_addr;
+   wire last_addr = &rd_addr;
 
    always @(rd_addr) begin
       rd_data <= rd_data + 1;
@@ -48,6 +46,19 @@ module transmit_tb();
    always @(posedge done) begin
       if(~last_addr) -> t_fail;      
    end
+
+   reg       check_last;
+   
+   always @(rd_addr) begin
+      if(last_addr)
+        check_last <= 1'b1;
+      else
+        check_last <= 1'b0;
+
+      if(check_last & |rd_addr)
+        -> t_fail;      
+   end
+
    
    always
      #5 clk = !clk;

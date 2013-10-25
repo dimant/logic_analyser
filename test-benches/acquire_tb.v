@@ -48,7 +48,19 @@ module acquire_tb;
    always @(posedge last_addr) begin
       hit_last = 1'b1;    
    end
+
+   reg       check_last;
    
+   always @(wr_addr) begin
+      if(last_addr)
+        check_last <= 1'b1;
+      else
+        check_last <= 1'b0;
+
+      if(check_last & |wr_addr)
+        -> t_fail;      
+   end
+
    initial begin
       #49999 if(~hit_last) -> t_fail;      
       #50000 $finish;
